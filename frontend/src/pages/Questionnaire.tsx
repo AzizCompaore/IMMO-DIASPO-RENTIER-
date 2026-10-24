@@ -54,13 +54,6 @@ export default function Questionnaire() {
             {q.loadError ? (
               <div role="alert"><p className="error">{q.loadError}</p><button className="btn" type="button" onClick={q.retry}>Réessayer</button></div>
             ) : !q.ready ? <p>Chargement…</p> : (
-              q.previewComplete ? (
-                <div className="preview-complete" role="status">
-                  <h2>Aperçu terminé</h2>
-                  <p>Aucune réponse n’a été envoyée ou enregistrée. Le questionnaire ne peut recevoir de demandes qu’après la mise en ligne de son serveur.</p>
-                  <button className="btn back" type="button" onClick={q.retry}>Revoir le questionnaire</button>
-                </div>
-              ) : (
               <form noValidate onSubmit={(e) => { e.preventDefault(); q.goNext(); }}>
                 <div className="progress-top"><strong>{`0${step + 1} — ${STEP_NAMES[step]}`}</strong><span>Étape {step + 1} sur 4</span></div>
                 <div className="track" role="progressbar" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}>
@@ -122,7 +115,6 @@ export default function Questionnaire() {
                   <button className="btn" type="submit" disabled={q.busy}>{q.busy ? "Enregistrement…" : CONFIG.demoMode && step === 3 ? "Terminer l’aperçu →" : step === 3 ? "Vérifier mon éligibilité →" : "Continuer →"}</button>
                 </div>
               </form>
-              )
             )}
           </section>
           <aside className="aside">

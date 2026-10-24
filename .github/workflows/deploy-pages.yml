@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -44,7 +46,6 @@ jobs:
         run: |
           npm run build -- --base=/IMMO-DIASPO-RENTIER-/
           cp dist/index.html dist/404.html
-          rm -f dist/images/*.mp4
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

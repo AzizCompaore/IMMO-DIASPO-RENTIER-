@@ -10,6 +10,7 @@
 .ty .brand{font-weight:800;color:var(--brown);letter-spacing:.06em;text-decoration:none;font-size:clamp(.88rem,2vw,1.12rem)}
 .ty .byline{font-size:.76rem;letter-spacing:.13em;color:var(--terra);font-weight:800}
 .ty .hero{padding:64px 0 72px;text-align:center}
+.ty .demo-notice{max-width:800px;margin:0 auto 28px;padding:13px 18px;border:1px solid #e7b58f;border-radius:10px;background:#fff3e7;color:#68452f;font-size:.92rem}
 .ty .check{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:#f8e5d9;color:var(--terra);margin:0 auto 22px}
 .ty .check svg{width:32px;height:32px}
 .ty .hero h1{max-width:900px;margin:0 auto 18px;font-size:clamp(2rem,4.4vw,3.5rem)}

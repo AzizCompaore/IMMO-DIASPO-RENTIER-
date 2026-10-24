@@ -14,17 +14,18 @@ function Whatsapp() {
 }
 
 export default function ThankYou() {
-  // Le succès n'est affiché qu'après une soumission réellement enregistrée par le serveur.
-  if (sessionStorage.getItem("idr_submitted") !== "1") return <Navigate to="/" replace />;
+  const demoSubmission = CONFIG.demoMode && sessionStorage.getItem("idr_demo_preview") === "1";
+  if (sessionStorage.getItem("idr_submitted") !== "1" && !demoSubmission) return <Navigate to="/" replace />;
   const svg = (d: React.ReactNode) => <svg viewBox="0 0 24 24" aria-hidden="true">{d}</svg>;
   return (
     <div className="ty">
       <header className="header"><div className="container"><a className="brand" href="#top">IMMO DIASPO RENTIER</a><span className="byline">URIEL GROUP</span></div></header>
       <main id="top">
         <section className="hero container" aria-labelledby="hero-title">
+          {demoSubmission && <p className="demo-notice" role="status">Mode démonstration : aucune demande n’a été transmise ni enregistrée.</p>}
           <div className="check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>
           <h1 id="hero-title">Félicitations pour cette première étape vers votre investissement immobilier à Abidjan.</h1>
-          <p className="confirmation">Votre demande a bien été reçue !</p>
+          <p className="confirmation">{demoSubmission ? "Aperçu du parcours terminé." : "Votre demande a bien été reçue !"}</p>
           <div className="video" aria-label="Vidéo de remerciement et prochaines étapes">
             <VideoEmbed url={CONFIG.thankYouVideoUrl} title="Vidéo de remerciement IMMO DIASPO RENTIER"
               fallback={<div className="video-placeholder"><span className="play" aria-hidden="true">▶</span><span>Vidéo de remerciement et prochaines étapes</span></div>} />

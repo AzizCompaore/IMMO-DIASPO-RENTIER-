@@ -23,7 +23,6 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [previewComplete, setPreviewComplete] = useState(false);
   const sess = useRef<{ id: string; token: string } | null>(null);
   const timer = useRef<number>();
   const latest = useRef({ answers, step });
@@ -32,9 +31,10 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
 
   const init = useCallback(async () => {
     setLoadError(""); setReady(false);
-    setPreviewComplete(false); setError(""); setFieldErrors({}); setSaveState("idle");
+    setError(""); setFieldErrors({}); setSaveState("idle");
     if (CONFIG.demoMode) {
       sess.current = null;
+      sessionStorage.removeItem("idr_demo_preview");
       setAnswers({}); setStep(0); setReady(true);
       return;
     }
@@ -108,7 +108,10 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
       delete errs.consent;
       if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter les réponses de cette étape pour continuer l’aperçu."); return; }
       if (step < 3) { setStep(step + 1); setFieldErrors({}); window.scrollTo({ top: 0, behavior: "smooth" }); }
-      else setPreviewComplete(true);
+      else {
+        sessionStorage.setItem("idr_demo_preview", "1");
+        onSubmitted();
+      }
       return;
     }
     if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter toutes les réponses de cette étape."); return; }
@@ -126,5 +129,5 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     } finally { setBusy(false); }
   };
 
-  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy, previewComplete };
+  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy };
 }
