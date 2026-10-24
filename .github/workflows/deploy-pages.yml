@@ -34,6 +34,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+          VITE_DEMO_MODE: ${{ vars.VITE_DEMO_MODE || 'true' }}
           VITE_VIDEO_URL: ${{ vars.VITE_VIDEO_URL }}
           VITE_THANKYOU_VIDEO_URL: ${{ vars.VITE_THANKYOU_VIDEO_URL }}
           VITE_WHATSAPP_GROUP_URL: ${{ vars.VITE_WHATSAPP_GROUP_URL }}

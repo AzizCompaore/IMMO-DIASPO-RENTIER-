@@ -23,7 +23,7 @@ docker compose exec backend python manage.py createsuperuser
 Services : `db`, `backend` (Gunicorn), `scheduler` (abandons toutes les 5 min), `web` (Nginx + React). Sauvegardes : planifier `pg_dump` (non automatisé).
 
 ## GitHub Pages
-Le frontend statique est publié automatiquement sur https://azizcompaore.github.io/IMMO-DIASPO-RENTIER-/ à chaque push sur `main`. GitHub Pages héberge uniquement le frontend : pour activer le questionnaire et l'administration, il faut aussi déployer Django et définir la variable de dépôt `VITE_API_BASE` avec l'URL publique de son API (par exemple `https://api.example.com/api/v1`). Le backend doit autoriser l'origine GitHub Pages dans `CORS_ALLOWED_ORIGINS` ; l'authentification de l'administration nécessite également une configuration compatible avec les cookies inter-origines.
+Le frontend statique est publié automatiquement sur https://azizcompaore.github.io/IMMO-DIASPO-RENTIER-/ à chaque push sur `main`. Sans backend déployé, la page fonctionne en mode aperçu : les étapes s'affichent, mais aucune réponse n'est enregistrée ni envoyée. Pour activer les demandes réelles, déployer Django et PostgreSQL, définir les variables de dépôt GitHub Actions `VITE_DEMO_MODE=false` et `VITE_API_BASE` (URL publique de l'API, par exemple `https://api.example.com/api/v1`), puis autoriser l'origine Pages dans `CORS_ALLOWED_ORIGINS`. L'authentification de l'administration nécessite également une configuration compatible avec les cookies inter-origines.
 
 ## Tests
 `cd backend && DB_ENGINE=sqlite DJANGO_DEBUG=1 python manage.py test` · `cd frontend && npm test`.

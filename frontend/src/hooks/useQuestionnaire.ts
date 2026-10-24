@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CONFIG } from "../config";
 import { ApiError } from "../services/api";
 import * as api from "../services/questionnaireApi";
 import type { Answers } from "../services/questionnaireApi";
@@ -22,6 +23,7 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [previewComplete, setPreviewComplete] = useState(false);
   const sess = useRef<{ id: string; token: string } | null>(null);
   const timer = useRef<number>();
   const latest = useRef({ answers, step });
@@ -30,6 +32,12 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
 
   const init = useCallback(async () => {
     setLoadError(""); setReady(false);
+    setPreviewComplete(false); setError(""); setFieldErrors({}); setSaveState("idle");
+    if (CONFIG.demoMode) {
+      sess.current = null;
+      setAnswers({}); setStep(0); setReady(true);
+      return;
+    }
     try {
       const stored = JSON.parse(localStorage.getItem(KEY) ?? "null");
       if (stored?.id && stored?.token) {
@@ -61,6 +69,7 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
 
   const autosave = useCallback(() => {
     window.clearTimeout(timer.current);
+    if (CONFIG.demoMode) return;
     timer.current = window.setTimeout(() => {
       const s = sess.current; if (!s) return;
       const { answers: a, step: st } = latest.current;
@@ -78,6 +87,7 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
   };
 
   const completeCurrent = async () => {
+    if (CONFIG.demoMode) return;
     const s = sess.current!; window.clearTimeout(timer.current);
     const { answers: a, step: st } = latest.current;
     setSaveState("saving");
@@ -88,6 +98,11 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
   const goBack = () => { if (step > 0) { window.clearTimeout(timer.current); setStep(step - 1); setError(""); setFieldErrors({}); api.sendStepViewed(sess.current!.id, sess.current!.token, step - 1); } };
 
   const goNext = async () => {
+    if (CONFIG.demoMode) {
+      if (step < 3) { setStep(step + 1); setFieldErrors({}); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      else setPreviewComplete(true);
+      return;
+    }
     const errs = validateStep(step, answers);
     if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter toutes les réponses de cette étape."); return; }
     setBusy(true); setError("");
@@ -104,5 +119,5 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     } finally { setBusy(false); }
   };
 
-  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy };
+  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy, previewComplete };
 }

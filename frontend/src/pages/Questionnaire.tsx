@@ -46,17 +46,27 @@ export default function Questionnaire() {
           <h1>Vérifiez votre éligibilité <span style={{ color: "var(--terra)" }}>au financement.</span></h1>
           <p>Quelques informations suffisent pour préparer un premier échange avec notre équipe. La vérification est gratuite et sans engagement.</p>
         </section>
+        {CONFIG.demoMode && <div className="demo-banner" role="status">
+          <strong>Mode aperçu</strong> — vos réponses restent dans cette page, ne sont ni envoyées ni enregistrées. N’utilisez pas de vraies informations personnelles.
+        </div>}
         <div className="shell">
           <section className="form-card">
             {q.loadError ? (
               <div role="alert"><p className="error">{q.loadError}</p><button className="btn" type="button" onClick={q.retry}>Réessayer</button></div>
             ) : !q.ready ? <p>Chargement…</p> : (
+              q.previewComplete ? (
+                <div className="preview-complete" role="status">
+                  <h2>Aperçu terminé</h2>
+                  <p>Aucune réponse n’a été envoyée ou enregistrée. Le questionnaire ne peut recevoir de demandes qu’après la mise en ligne de son serveur.</p>
+                  <button className="btn back" type="button" onClick={q.retry}>Revoir le questionnaire</button>
+                </div>
+              ) : (
               <form noValidate onSubmit={(e) => { e.preventDefault(); q.goNext(); }}>
                 <div className="progress-top"><strong>{`0${step + 1} — ${STEP_NAMES[step]}`}</strong><span>Étape {step + 1} sur 4</span></div>
                 <div className="track" role="progressbar" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}>
                   {[0, 1, 2, 3].map((i) => <div key={i} className={`segment${i <= step ? " active" : ""}`} />)}
                 </div>
-                <p className={`save-state${q.saveState === "error" ? " err" : ""}`} aria-live="polite" style={{ margin: "-14px 0 14px", minHeight: 18 }}>{saveText}</p>
+                <p className={`save-state${q.saveState === "error" ? " err" : ""}`} aria-live="polite" style={{ margin: "-14px 0 14px", minHeight: 18 }}>{CONFIG.demoMode ? "Aucun enregistrement en mode aperçu" : saveText}</p>
 
                 {step === 0 && <div className="step active">
                   <h2>Parlons de vous</h2><p className="step-desc">Votre situation nous aide à préparer un échange adapté à votre profil.</p>
@@ -95,19 +105,24 @@ export default function Questionnaire() {
                     {text("email", "Adresse e-mail", { type: "email", autoComplete: "email", placeholder: "vous@exemple.com" })}
                   </div>
                   <div className="field">
-                    <label className="choice"><input type="checkbox" checked={a.consent === true} onChange={(e) => set("consent", e.target.checked)} /><span>J'accepte d'être recontacté(e) au sujet de ma demande et j'ai pris connaissance des informations relatives au traitement de mes données.</span></label>
+                    {CONFIG.demoMode
+                      ? <p className="privacy">En production, l’envoi d’une demande nécessite votre consentement. Aucun consentement n’est demandé ni conservé en mode aperçu.</p>
+                      : <label className="choice"><input type="checkbox" checked={a.consent === true} onChange={(e) => set("consent", e.target.checked)} /><span>J'accepte d'être recontacté(e) au sujet de ma demande et j'ai pris connaissance des informations relatives au traitement de mes données.</span></label>}
                     {fe.consent && <p className="field-err" role="alert">{fe.consent}</p>}
                   </div>
-                  <p className="privacy">Vos réponses sont enregistrées au fil du questionnaire afin de vous permettre de le reprendre. Les mentions d'information définitives (finalité, durée de conservation, droits) seront publiées par URIEL GROUP.{" "}
-                    {CONFIG.privacyUrl ? <a href={CONFIG.privacyUrl} target="_blank" rel="noopener noreferrer">Politique de confidentialité</a> : null}</p>
+                  <p className="privacy">{CONFIG.demoMode
+                    ? "Mode aperçu : ne saisissez pas de coordonnées réelles. Aucune réponse n’est envoyée ni conservée."
+                    : <>Vos réponses sont enregistrées au fil du questionnaire afin de vous permettre de le reprendre. Les mentions d'information définitives (finalité, durée de conservation, droits) seront publiées par URIEL GROUP.{" "}
+                      {CONFIG.privacyUrl ? <a href={CONFIG.privacyUrl} target="_blank" rel="noopener noreferrer">Politique de confidentialité</a> : null}</>}</p>
                 </div>}
 
                 <p className="error" id="error" role="alert" aria-live="polite">{q.error}</p>
                 <div className="actions">
                   <button className="btn back" type="button" onClick={q.goBack} style={{ visibility: step ? "visible" : "hidden" }}>← Précédent</button>
-                  <button className="btn" type="submit" disabled={q.busy}>{q.busy ? "Enregistrement…" : step === 3 ? "Vérifier mon éligibilité →" : "Continuer →"}</button>
+                  <button className="btn" type="submit" disabled={q.busy}>{q.busy ? "Enregistrement…" : CONFIG.demoMode && step === 3 ? "Terminer l’aperçu →" : step === 3 ? "Vérifier mon éligibilité →" : "Continuer →"}</button>
                 </div>
               </form>
+              )
             )}
           </section>
           <aside className="aside">
