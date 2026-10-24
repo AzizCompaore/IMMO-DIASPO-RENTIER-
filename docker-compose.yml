@@ -1,0 +1,32 @@
+# HTTPS : à terminer en amont (reverse proxy / load balancer) qui transmet X-Forwarded-Proto.
+services:
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment: { POSTGRES_DB: "${POSTGRES_DB}", POSTGRES_USER: "${POSTGRES_USER}", POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}" }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"], interval: 5s, retries: 10 }
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on: { db: { condition: service_healthy } }
+    expose: ["8000"]
+  scheduler:   # détection d'abandon toutes les 5 minutes
+    build: ./backend
+    env_file: .env
+    depends_on: { db: { condition: service_healthy }, backend: { condition: service_started } }
+    command: ["sh", "-c", "while true; do python manage.py mark_abandoned; sleep 300; done"]
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_VIDEO_URL: "${VITE_VIDEO_URL:-}"
+        VITE_THANKYOU_VIDEO_URL: "${VITE_THANKYOU_VIDEO_URL:-}"
+        VITE_WHATSAPP_GROUP_URL: "${VITE_WHATSAPP_GROUP_URL:-}"
+        VITE_LEGAL_URL: "${VITE_LEGAL_URL:-}"
+        VITE_PRIVACY_URL: "${VITE_PRIVACY_URL:-}"
+        VITE_TERMS_URL: "${VITE_TERMS_URL:-}"
+    depends_on: [backend]
+    ports: ["8080:80"]
+volumes:
+  pgdata:
