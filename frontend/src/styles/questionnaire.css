@@ -27,6 +27,13 @@
 .qn .track{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:26px}
 .qn .segment{height:7px;border-radius:20px;background:#eee3d9}
 .qn .segment.active{background:var(--terra)}
+.qn .step-transition{min-height:265px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.qn .step-transition .progress-top{width:100%;align-self:stretch;text-align:left}
+.qn .step-transition .track{width:100%;align-self:stretch}
+.qn .step-spinner{width:38px;height:38px;border:3px solid #f0ded2;border-top-color:var(--terra);border-radius:50%;animation:qn-spin .75s linear infinite}
+.qn .step-transition p{margin:16px 0 0;color:var(--muted);font-size:14px}
+@keyframes qn-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.qn .step-spinner{animation-duration:1.5s}}
 .qn .step{display:none}
 .qn .step.active{display:block}
 .qn .step h2{font-size:30px;margin:0 0 6px}

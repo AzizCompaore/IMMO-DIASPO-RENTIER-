@@ -13,6 +13,7 @@ const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_ter
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 const pick = (a: Answers, step: number) => Object.fromEntries(STEP_FIELDS[step].filter((f) => f in a).map((f) => [f, a[f]]));
+const waitForStepTransition = () => new Promise<void>((resolve) => window.setTimeout(resolve, 350));
 
 export function useQuestionnaire(search: string, onSubmitted: () => void) {
   const [ready, setReady] = useState(false);
@@ -23,6 +24,7 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [transitionStep, setTransitionStep] = useState<number | null>(null);
   const sess = useRef<{ id: string; token: string } | null>(null);
   const timer = useRef<number>();
   const latest = useRef({ answers, step });
@@ -95,10 +97,15 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     catch (e) { setSaveState("error"); throw e; }
   };
 
-  const goBack = () => {
+  const goBack = async () => {
     if (step > 0) {
-      window.clearTimeout(timer.current); setStep(step - 1); setError(""); setFieldErrors({});
-      if (!CONFIG.demoMode && sess.current) api.sendStepViewed(sess.current.id, sess.current.token, step - 1);
+      const previousStep = step - 1;
+      window.clearTimeout(timer.current); setError(""); setFieldErrors({});
+      setTransitionStep(previousStep);
+      await waitForStepTransition();
+      setStep(previousStep);
+      setTransitionStep(null);
+      if (!CONFIG.demoMode && sess.current) api.sendStepViewed(sess.current.id, sess.current.token, previousStep);
     }
   };
 
@@ -107,7 +114,13 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     if (CONFIG.demoMode) {
       delete errs.consent;
       if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter les réponses de cette étape pour continuer l’aperçu."); return; }
-      if (step < 3) { setStep(step + 1); setFieldErrors({}); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      if (step < 3) {
+        const nextStep = step + 1;
+        setTransitionStep(nextStep);
+        await waitForStepTransition();
+        setStep(nextStep); setFieldErrors({}); setTransitionStep(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
       else {
         sessionStorage.setItem("idr_demo_preview", "1");
         onSubmitted();
@@ -116,9 +129,15 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     }
     if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter toutes les réponses de cette étape."); return; }
     setBusy(true); setError("");
+    const nextStep = step < 3 ? step + 1 : null;
+    if (nextStep !== null) setTransitionStep(nextStep);
     try {
-      await completeCurrent();
-      if (step < 3) { const n = step + 1; setStep(n); setFieldErrors({}); api.sendStepViewed(sess.current!.id, sess.current!.token, n); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      await Promise.all([completeCurrent(), nextStep !== null ? waitForStepTransition() : Promise.resolve()]);
+      if (nextStep !== null) {
+        setStep(nextStep); setFieldErrors({});
+        api.sendStepViewed(sess.current!.id, sess.current!.token, nextStep);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
       else {
         await api.submitSession(sess.current!.id, sess.current!.token);
         localStorage.removeItem(KEY); sessionStorage.setItem("idr_submitted", "1"); onSubmitted();
@@ -126,8 +145,8 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     } catch (e) {
       if (e instanceof ApiError) { setError(e.message); if (Object.keys(e.errors).length) setFieldErrors(e.errors as Record<string, string>); }
       else setError("Une erreur est survenue. Réessayez.");
-    } finally { setBusy(false); }
+    } finally { setTransitionStep(null); setBusy(false); }
   };
 
-  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy };
+  return { ready, loadError, retry: init, answers, setAnswer, step, goBack, goNext, saveState, error, fieldErrors, busy, transitionStep };
 }
