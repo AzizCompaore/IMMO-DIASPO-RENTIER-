@@ -30,7 +30,7 @@ export default function Landing() {
       </svg>
 
       <header className="header"><div className="wrap head-inner">
-        <a className="brand" href="#accueil" aria-label="Retour en haut"><span className="brand-mark" aria-hidden="true">U</span><span><span className="brand-name">URIEL GROUP</span><br /><span className="brand-sub">INVESTIR · BÂTIR · PÉRENNISER</span></span></a>
+        <a className="brand" href="#accueil" aria-label="Retour en haut"><img className="brand-logo" src={CONFIG.logoUrl} alt="" /><span><span className="brand-name">URIEL GROUP</span><br /><span className="brand-sub">INVESTIR · BÂTIR · PÉRENNISER</span></span></a>
         <Cta small />
       </div></header>
 

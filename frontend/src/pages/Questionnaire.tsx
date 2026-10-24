@@ -39,7 +39,7 @@ export default function Questionnaire() {
 
   return (
     <div className="qn">
-      <header><div className="brand">IMMO <span>DIASPO</span> RENTIER</div><div className="brand-note">Une solution dédiée à la diaspora</div></header>
+      <header><div className="brand"><img className="brand-logo" src={CONFIG.logoUrl} alt="" />IMMO <span>DIASPO</span> RENTIER</div><div className="brand-note">Une solution dédiée à la diaspora</div></header>
       <main>
         <section className="intro">
           <div className="eyebrow">Votre projet immobilier à Abidjan</div>

@@ -19,7 +19,7 @@ export default function ThankYou() {
   const svg = (d: React.ReactNode) => <svg viewBox="0 0 24 24" aria-hidden="true">{d}</svg>;
   return (
     <div className="ty">
-      <header className="header"><div className="container"><a className="brand" href="#top">IMMO DIASPO RENTIER</a><span className="byline">URIEL GROUP</span></div></header>
+      <header className="header"><div className="container"><a className="brand" href="#top"><img className="brand-logo" src={CONFIG.logoUrl} alt="" />IMMO DIASPO RENTIER</a><span className="byline">URIEL GROUP</span></div></header>
       <main id="top">
         <section className="hero container" aria-labelledby="hero-title">
           {demoSubmission && <p className="demo-notice" role="status">Mode démonstration : aucune demande n’a été transmise ni enregistrée.</p>}

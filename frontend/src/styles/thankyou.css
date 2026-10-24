@@ -7,7 +7,8 @@
 .ty .container{width:min(1100px,calc(100% - 40px));margin:auto}
 .ty .header{border-bottom:1px solid var(--line);background:var(--ivory)}
 .ty .header .container{display:flex;align-items:center;justify-content:space-between;min-height:78px;gap:16px}
-.ty .brand{font-weight:800;color:var(--brown);letter-spacing:.06em;text-decoration:none;font-size:clamp(.88rem,2vw,1.12rem)}
+.ty .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--brown);letter-spacing:.06em;text-decoration:none;font-size:clamp(.88rem,2vw,1.12rem)}
+.ty .brand-logo{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#17120f;flex:none}
 .ty .byline{font-size:.76rem;letter-spacing:.13em;color:var(--terra);font-weight:800}
 .ty .hero{padding:64px 0 72px;text-align:center}
 .ty .demo-notice{max-width:800px;margin:0 auto 28px;padding:13px 18px;border:1px solid #e7b58f;border-radius:10px;background:#fff3e7;color:#68452f;font-size:.92rem}
