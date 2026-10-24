@@ -2,9 +2,9 @@
 const v = (x: string | undefined) => (x ?? "").trim();
 
 export const CONFIG = {
-  apiBase: "/api/v1",
+  apiBase: v(import.meta.env.VITE_API_BASE) || "/api/v1",
   videoUrl: v(import.meta.env.VITE_VIDEO_URL),
-  thankYouVideoUrl: v(import.meta.env.VITE_THANKYOU_VIDEO_URL) || "/images/VIDEO%20derni%C3%A8re%20page.mp4",
+  thankYouVideoUrl: v(import.meta.env.VITE_THANKYOU_VIDEO_URL) || (import.meta.env.BASE_URL === "/" ? "/images/VIDEO%20derni%C3%A8re%20page.mp4" : ""),
   whatsappGroupUrl: v(import.meta.env.VITE_WHATSAPP_GROUP_URL),
   legalUrl: v(import.meta.env.VITE_LEGAL_URL),
   privacyUrl: v(import.meta.env.VITE_PRIVACY_URL),

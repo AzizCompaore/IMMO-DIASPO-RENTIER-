@@ -4,6 +4,7 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 # Les VITE_* sont figées à la compilation (voir docker-compose.yml, build.args).
+ARG VITE_API_BASE
 ARG VITE_VIDEO_URL
 ARG VITE_THANKYOU_VIDEO_URL
 ARG VITE_WHATSAPP_GROUP_URL

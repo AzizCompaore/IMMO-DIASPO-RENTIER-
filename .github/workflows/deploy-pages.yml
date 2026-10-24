@@ -1,0 +1,65 @@
+name: Deploy frontend to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+          VITE_VIDEO_URL: ${{ vars.VITE_VIDEO_URL }}
+          VITE_THANKYOU_VIDEO_URL: ${{ vars.VITE_THANKYOU_VIDEO_URL }}
+          VITE_WHATSAPP_GROUP_URL: ${{ vars.VITE_WHATSAPP_GROUP_URL }}
+          VITE_LEGAL_URL: ${{ vars.VITE_LEGAL_URL }}
+          VITE_PRIVACY_URL: ${{ vars.VITE_PRIVACY_URL }}
+          VITE_TERMS_URL: ${{ vars.VITE_TERMS_URL }}
+        run: |
+          npm run build -- --base=/IMMO-DIASPO-RENTIER-/
+          cp dist/index.html dist/404.html
+          rm -f dist/images/*.mp4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
