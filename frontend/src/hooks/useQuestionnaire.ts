@@ -95,15 +95,22 @@ export function useQuestionnaire(search: string, onSubmitted: () => void) {
     catch (e) { setSaveState("error"); throw e; }
   };
 
-  const goBack = () => { if (step > 0) { window.clearTimeout(timer.current); setStep(step - 1); setError(""); setFieldErrors({}); api.sendStepViewed(sess.current!.id, sess.current!.token, step - 1); } };
+  const goBack = () => {
+    if (step > 0) {
+      window.clearTimeout(timer.current); setStep(step - 1); setError(""); setFieldErrors({});
+      if (!CONFIG.demoMode && sess.current) api.sendStepViewed(sess.current.id, sess.current.token, step - 1);
+    }
+  };
 
   const goNext = async () => {
+    const errs = validateStep(step, answers);
     if (CONFIG.demoMode) {
+      delete errs.consent;
+      if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter les réponses de cette étape pour continuer l’aperçu."); return; }
       if (step < 3) { setStep(step + 1); setFieldErrors({}); window.scrollTo({ top: 0, behavior: "smooth" }); }
       else setPreviewComplete(true);
       return;
     }
-    const errs = validateStep(step, answers);
     if (Object.keys(errs).length) { setFieldErrors(errs); setError("Merci de compléter toutes les réponses de cette étape."); return; }
     setBusy(true); setError("");
     try {
